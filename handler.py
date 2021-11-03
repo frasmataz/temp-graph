@@ -10,7 +10,7 @@ TIMESTREAM_DB = '433-data'
 S3_BUCKET = 'fsharp-433-data-graphs'
 
 def endpoint(event, context):
-    data = fetch_data('14d')
+    data = fetch_data('3d')
     if generate_graph(data):
         graph_url = upload_to_s3()
 
@@ -115,3 +115,6 @@ def upload_to_s3():
     s3.upload_file('/tmp/output.png', S3_BUCKET, 'output.png')
     s3.put_object_acl(ACL='public-read', Bucket=S3_BUCKET, Key='output.png')
     return f'https://{S3_BUCKET}.s3.amazonaws.com/output.png'
+
+if __name__ == "__main__":
+    endpoint(None,None)
