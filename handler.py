@@ -9,8 +9,14 @@ from pprint import pprint
 TIMESTREAM_DB = '433-data'
 S3_BUCKET = 'fsharp-433-data-graphs'
 
+def one_day(event, context):
+    return draw_graph('1d')
+
 def three_day(event, context):
-    data = fetch_data('3d')
+    return draw_graph('3d')
+
+def draw_graph(time):
+    data = fetch_data(time)
     if generate_graph(data):
         graph_url = upload_to_s3()
 

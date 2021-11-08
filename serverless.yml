@@ -13,6 +13,15 @@ provider:
         - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
 
 functions:
+  one_day:
+    handler: handler.one_day
+    memorySize: 1024
+    timeout: 20
+    events:
+      - httpApi:
+          path: /1d
+          method: get
+
   three_day:
     handler: handler.three_day
     memorySize: 1024
