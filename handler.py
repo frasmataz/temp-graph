@@ -9,7 +9,7 @@ from pprint import pprint
 TIMESTREAM_DB = '433-data'
 S3_BUCKET = 'fsharp-433-data-graphs'
 
-def endpoint(event, context):
+def three_day(event, context):
     data = fetch_data('3d')
     if generate_graph(data):
         graph_url = upload_to_s3()
@@ -51,7 +51,6 @@ def fetch_data_for_sensor(sensor, timescale):
     humidities = []
     temperatures = []
 
-    print(response)
     for row in response['Rows']:
         if row['Data'][1]['ScalarValue'] == 'humid':
             humidities.append({
@@ -117,4 +116,4 @@ def upload_to_s3():
     return f'https://{S3_BUCKET}.s3.amazonaws.com/output.png'
 
 if __name__ == "__main__":
-    endpoint(None,None)
+    three_day(None,None)

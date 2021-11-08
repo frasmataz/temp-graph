@@ -1,0 +1,30 @@
+service: temp-graph
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  region: eu-west-1
+  runtime: python3.9
+  lambdaHashingVersion: '20201221'
+  iam:
+    role:
+      managedPolicies:
+        - 'arn:aws:iam::aws:policy/AmazonTimestreamReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+
+functions:
+  three_day:
+    handler: handler.three_day
+    memorySize: 1024
+    timeout: 20
+    events:
+      - httpApi:
+          path: /3d
+          method: get
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
