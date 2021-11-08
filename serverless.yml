@@ -31,6 +31,15 @@ functions:
           path: /3d
           method: get
 
+  sensor:
+    handler: handler.sensor
+    memorySize: 256
+    timeout: 20
+    events:
+      - httpApi:
+          path: /now/{sensor}/{reading}
+          method: get
+
 plugins:
   - serverless-python-requirements
 

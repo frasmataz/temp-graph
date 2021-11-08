@@ -9,11 +9,32 @@ from pprint import pprint
 TIMESTREAM_DB = '433-data'
 S3_BUCKET = 'fsharp-433-data-graphs'
 
+
+# API Endpoints:
+# ==============
 def one_day(event, context):
     return draw_graph('1d')
 
 def three_day(event, context):
     return draw_graph('3d')
+
+def sensor(event, context):
+    return get_sensor_latest(event['pathParameters']['sensor'], event['pathParameters']['reading'])
+# ==============
+
+def get_sensor_latest(sensor, reading):
+    timestream = boto3.client('timestream-query')
+
+    query = f"SELECT * FROM \"{TIMESTREAM_DB}\".\"{sensor}\" \
+              WHERE measure_name = '{reading}' \
+              ORDER BY time DESC LIMIT 1"
+
+    response = timestream.query(QueryString=query)
+
+    return {
+        'time': response['Rows'][0]['Data'][2]['ScalarValue'],
+        'reading': float(response['Rows'][0]['Data'][3]['ScalarValue'])
+    }
 
 def draw_graph(time):
     data = fetch_data(time)
