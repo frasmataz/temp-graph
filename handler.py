@@ -5,6 +5,7 @@ import boto3
 from dateutil import parser
 from datetime import timedelta
 from pprint import pprint
+import math
 
 TIMESTREAM_DB = '433-data'
 S3_BUCKET = 'fsharp-433-data-graphs'
@@ -24,6 +25,28 @@ def sensor(event, context):
 
 def get_sensor_latest(sensor, reading):
     timestream = boto3.client('timestream-query')
+    
+    if reading == 'dewpoint':
+        tquery = f"SELECT * FROM \"{TIMESTREAM_DB}\".\"{sensor}\" \
+                WHERE measure_name = 'temp' \
+                ORDER BY time DESC LIMIT 1"
+        hquery = f"SELECT * FROM \"{TIMESTREAM_DB}\".\"{sensor}\" \
+                WHERE measure_name = 'humid' \
+                ORDER BY time DESC LIMIT 1"
+        tresponse = timestream.query(QueryString=tquery)
+        hresponse = timestream.query(QueryString=hquery)
+
+        temp = float(tresponse['Rows'][0]['Data'][3]['ScalarValue'])
+        humid = float(hresponse['Rows'][0]['Data'][3]['ScalarValue'])
+        A = 17.27
+        B = 237.7
+        alpha = ((A * temp) / (B + temp)) + math.log(humid/100.0)
+        dewpoint = (B * alpha) / (A - alpha)
+
+        return  {
+            'time': tresponse['Rows'][0]['Data'][2]['ScalarValue'],
+            'reading': round(dewpoint,1)
+        }     
 
     query = f"SELECT * FROM \"{TIMESTREAM_DB}\".\"{sensor}\" \
               WHERE measure_name = '{reading}' \
